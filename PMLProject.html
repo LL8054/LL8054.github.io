@@ -144,41 +144,41 @@ dim(training)</code></pre>
 <p>RF is the first model that comes to mind for classification and regression (at least for me). Since it uses recursive partitioning bootstrap sampling for every tree it’s extremely accurate.</p>
 <pre class="r"><code>set.seed(1)
 modelFitRF &lt;- randomForest(classe ~ ., data=training)       #Fitting the model
-predictRF &lt;- predict(modelFitRF, validating, type=&quot;class&quot;)  #Predicting using our trained model
+predictRF &lt;- predict(modelFitRF, validating, type=&quot;class&quot;)  #Predicting error using cross validation
 cmRF &lt;- confusionMatrix(predictRF, validating$classe)       #Comparing the results to discover accuracy
 cmRF$overall['Accuracy']</code></pre>
 <pre><code>## Accuracy 
-##   0.9976</code></pre>
+##   0.9973</code></pre>
 <pre class="r"><code>table(predictRF, validating$classe)</code></pre>
 <pre><code>##          
 ## predictRF    A    B    C    D    E
 ##         A 1395    1    0    0    0
-##         B    0  948    2    0    0
-##         C    0    0  853    6    0
-##         D    0    0    0  797    2
-##         E    0    0    0    1  899</code></pre>
-<p>An Accuracy of 0.9976 is NICE, especially considering that number is generated NOT for the dataset used to train the model but instead for another dataset, the validation dataset. Let’s try another model though and see if we can improve on that error number.</p>
+##         B    0  948    3    0    0
+##         C    0    0  852    7    0
+##         D    0    0    0  796    1
+##         E    0    0    0    1  900</code></pre>
+<p>An Accuracy of 0.9974 is NICE, especially considering that number is generated NOT for the training dataset but instead for the cross validation dataset. Naturally, our error percentage would improve with repeated instances of the previous processes, but since there is inherent cross validation (k-fold) built into the Random Forest algorithm and also since we cross validated the model with a new dataset, validation, the improvements would be negligible. Let’s try another model though and see if we can improve on that error number.</p>
 </div>
 <div id="training-model-2-ctree" class="section level3">
 <h3><font color="blue"> Training Model 2: Ctree </font></h3>
 <p>Ctree is another recursive partitioning method like random forest, but it has a slight change in that it also includes an algorithm based on <a href="http://cran.r-project.org/web/packages/party/index.html">parametric models</a>. Ctree also uses <a href="http://cran.r-project.org/web/packages/partykit/vignettes/ctree.pdf">algorithms to select variables by significance and weighting of distributional properties of the measures.</a> Plain talk- we’ll see if there’s a way to improve on the branches of the tree.</p>
 <pre class="r"><code>set.seed(1)
 modelFitCT &lt;- ctree(classe ~ ., data=training)                #Fitting the model
-predictCT &lt;- predict(modelFitCT, validating)                  #Prediction 
+predictCT &lt;- predict(modelFitCT, validating)                  #Prediction via cross validation
 cmCT &lt;- confusionMatrix(predictCT, validating$classe)        #Accuracy
 cmCT$overall['Accuracy']</code></pre>
 <pre><code>## Accuracy 
-##   0.8885</code></pre>
+##   0.9025</code></pre>
 <pre class="r"><code>table(predictCT, validating$classe)</code></pre>
 <pre><code>##          
 ## predictCT    A    B    C    D    E
-##         A 1292   67   14   28    5
-##         B   55  789   33   29   42
-##         C   11   37  784   45   11
-##         D   32   32   22  678   29
-##         E    5   24    2   24  814</code></pre>
-<p>As the table of prediction results and the accuracy of 0.89 reveal, this method’s worse than random forest.</p>
-<p>Truth be told I don’t think we can beat Random Forest’s accuracy of 99.755 percent. The Random Forest model will be used to predict the 20 test cases from testing. Even though the out-of-sample error can’t be predicted exactly, Random Forest’s in-sample error after cross validation was the lowest. And since we know cross validated the model with a validation data set instead of the training data set we expect the error to be very close to the same. Hence we’ll use the Random Forest model to predict the final 20 instances.</p>
+##         A 1315   46   17   19   11
+##         B   31  826   44   30   23
+##         C   11   36  750   36   14
+##         D   32   22   21  702   20
+##         E    6   19   23   17  833</code></pre>
+<p>After cross validating with the validation dataset gives us an accuracy of 0.9 we can see this method’s worse than random forest.</p>
+<p>Truth be told I don’t think we can beat Random Forest’s accuracy of 99.735 percent. The Random Forest model will be used to predict the 20 test cases from testing. Even though the out-of-sample error can’t be predicted exactly, Random Forest’s in-sample error after cross validation was the lowest. And since we cross validated the model with a validation data set instead of the training data set we expect the error to be very close but just a little higher due to out-of-sample error. Hence we’ll use the Random Forest model to predict the final 20 instances.</p>
 <pre class="r"><code>predictFinalRF &lt;- predict(modelFitRF, finaltesting.csv, type=&quot;class&quot;)</code></pre>
 <p>Submitting the answers.</p>
 <pre class="r"><code>answers &lt;- paste(predictFinalRF) #converting predictFinalRF to a character vector
